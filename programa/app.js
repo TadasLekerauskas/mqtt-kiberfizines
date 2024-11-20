@@ -5,6 +5,11 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const mqtt = require('mqtt')
 
+const clientId = 'app'
+
+var topic = 'mqtt/kiberfizines'
+var topicFoto = 'info/fotorezistorius'
+var topicDHT = 'info/dhtSensorius'
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -39,5 +44,22 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+const client = mqtt.connect("mqtt://broker.hivemq.com")
+
+client.on('connect', () => {
+  console.log('Connected')
+  client.subscribe([topic, topicFoto, topicDHT], () => {
+    console.log(`Subscribe to topic '${topic}', topic '${topicFoto}' and topic '${topicDHT}`)
+  })
+})
+
+client.on('message', (topic, payload) => {
+  console.log('Received Message:', topic, payload.toString())
+})
+
+client.on('disconnect', () => {
+  console.log("Atsijunge");
+})
 
 module.exports = app;
