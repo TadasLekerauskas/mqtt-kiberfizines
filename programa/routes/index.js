@@ -3,6 +3,7 @@ var router = express.Router();
 
 const mqtt = require('mqtt')
 let once = true;
+let client;
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -25,22 +26,65 @@ router.get('/', function(req, res, next) {
       res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
     }
     else{
-      console.log("Nera fotorezistoriaus");
+      console.log("Nera duomenu");
     }
   })
 })
 
 router.post('/', function(req, res, next) {
+  //console.log(req.body);
   var db = req.db;
+  if (req.body.submit == 'Patvirtinti'){
+    var fotoRiba = req.body.fotoSbmt;
+    var tmpVirsRiba = req.body.tmpSbmt;
+    var tmpApacRiba = req.body.drgSbmt;
+    sendMessageRibos(fotoRiba, tmpVirsRiba, tmpApacRiba);
+    // grazinam pradini puslapi
+    getAllData(db, function(data){
+      if(data != null){
+        //console.log(data[0]);
+        photoresistor = data[0].ftRk;
+        temperature = data[0].tmpRk;
+        humidity = data[0].drgRk;
+        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
+      }
+      else{
+        console.log("Nera duomenu");
+      }
+    })
+  }
 })
 
 module.exports = router;
+
+function sendMessageRibos(fotoRiba, tmpVirsRiba, tmpApacRiba){
+  let topic1 = 'command/foto';
+  let topic2 = 'command/tmpVir';
+  let topic3 = 'command/tmpApac';
+
+  client.publish(topic1, fotoRiba, { qos: 0, retain: false }, (error) => {
+    if (error) {
+      console.error(error)
+    }
+  })
+  client.publish(topic2, tmpVirsRiba, { qos: 0, retain: false }, (error) => {
+    if (error) {
+      console.error(error)
+    }
+  })
+  client.publish(topic3, tmpApacRiba, { qos: 0, retain: false }, (error) => {
+    if (error) {
+      console.error(error)
+    }
+  })
+
+}
 
 function subscribe(db){
   var topicFoto = 'info/fotorezistorius'
   var topicDHT = 'info/dhtSensorius'
 
-  const client = mqtt.connect("mqtt://broker.hivemq.com")
+  client = mqtt.connect("mqtt://broker.hivemq.com")
 
   client.on('connect', () => {
     console.log('Connected')
