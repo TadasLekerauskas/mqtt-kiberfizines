@@ -32,71 +32,26 @@ router.get('/', function(req, res, next) {
   let photoresistor = -1;
   let temperature = -100;
   let humidity = -1;
-  getPhotoresistor(db, function(data){
+  // padaryta taip nes vienas
+  getAllData(db, function(data){
     if(data != null){
-      photoresistor = data[0].Reiksme;
+      //console.log(data[0]);
+      photoresistor = data[0].ftRk;
+      temperature = data[0].tmpRk;
+      humidity = data[0].drgRk;
+      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
     }
     else{
       console.log("Nera fotorezistoriaus");
     }
   })
-  getTemperature(db, function(data){
-    if(data != null){
-      temperature = data[0].Reiksme;
-    }
-    else{
-      console.log("Nera temperaturos");
-    }
-  })
-  getHumidity(db, function(data){
-    if(data != null){
-      humidity = data[0].Reiksme;
-    }
-    else{
-      console.log("Nera Dregmes");
-    }
-  })
-
-  res.render('index', { title: 'Mqtt', 
-    fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
 });
-
 
 module.exports = router;
 
-function getTemperature(db, callback)
+function getAllData(db, callback)
 {
-  db.all('select Temperatura.Id, Temperatura.Reiksme FROM Temperatura', function(err,rows)
-  {
-      if(err)
-      {
-          console.log('*** Error serving querying database. ' + err);
-          return callback(null);
-      }
-      else
-      {
-          return callback(rows);
-      }
-  });
-}
-function getHumidity(db, callback)
-{
-  db.all('select Dregme.Id, Dregme.Reiksme FROM Dregme', function(err,rows)
-  {
-      if(err)
-      {
-          console.log('*** Error serving querying database. ' + err);
-          return callback(null);
-      }
-      else
-      {
-          return callback(rows);
-      }
-  });
-}
-function getPhotoresistor(db, callback)
-{
-  db.all('select Fotorezistorius.Id, Fotorezistorius.Reiksme From Fotorezistorius', function(err,rows)
+  db.all('select Temperatura.Id as tmpId, Temperatura.Reiksme as tmpRk, Dregme.Id as drgId, Dregme.Reiksme as drgRk, Fotorezistorius.Id ftId, Fotorezistorius.Reiksme as ftRk FROM Temperatura, Dregme, Fotorezistorius', function(err,rows)
   {
       if(err)
       {
