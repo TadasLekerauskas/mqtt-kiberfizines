@@ -12,4 +12,18 @@ block content
     li(class="form-row")
       label(for="dregme") Dregmes duomenys 
       textarea(name="dregme" id="dregme" rows=1 readonly) #{dregme}
+  h1 Siltnamio reiksmiu nustatymai 
+  form(method="POST")
+    ul(class="wrapper")
+      li(class="form-row")
+        label(for="fotoSbmt") Fotorezistoriaus riba 
+        input(type="number" name="fotoSbmt" id="fotoSbmt" rows=1)
+      li(class="form-row")
+        label(for="tmpSbmt") Temperaturos riba 
+        input(type="number" name="tmpSbmt" id="tmpSbmt" rows=1)
+      li(class="form-row")
+        label(for="drgSbmt") Dregmes riba 
+        input(type="number" name="drgSbmt" id="drgSbmt" rows=1)
+      li(class="from-row")
+        input(type="submit" name="submit" )
     
