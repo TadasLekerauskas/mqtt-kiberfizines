@@ -6,3 +6,40 @@ body {
 a {
   color: #00B7FF;
 }
+.wrapper {
+  background-color: rgb(247, 244, 244);
+  list-style-type: none;
+  padding: 0;
+  border-radius: 5px;
+}
+.form-row {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5em;
+}
+.form-row > label {
+  padding: 1em;
+  flex: 1;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+.form-row > input,
+.form-row > textarea {
+  flex: 2;
+}
+.form-row > input,
+.form-row > button,
+.form-row > textarea {
+  padding: 0.5em;
+  resize: vertical;
+  margin: 10px 0;
+  box-shadow: 0 0 15px 4px rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  font-size: 1.2em;
+}
+.form-row > textarea {
+  font-size: 1.5em;
+  background-color: rgb(242, 248, 248);
+  text-align: center;
+  font-weight: bold;
+}
