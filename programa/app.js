@@ -20,6 +20,10 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+// Serve Static Files
+app.use(express.static("public"));
+app.use("/assets", express.static("public"));
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
