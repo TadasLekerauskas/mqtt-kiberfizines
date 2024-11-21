@@ -3,22 +3,33 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-const mqtt = require('mqtt')
 
-const clientId = 'app'
+var sqlite3 = require('sqlite3');
 
-var topic = 'mqtt/kiberfizines'
-var topicFoto = 'info/fotorezistorius'
-var topicDHT = 'info/dhtSensorius'
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 var app = express();
 
+/*** db aprasymas ***/
+var db = new sqlite3.Database('./data/siltnamis.db');
+
+/*** db idejimas i req ***/
+app.use(function(req, res, next) 
+{
+    req.db = db;
+    next();
+});
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+// Serve Static Files
+app.use(express.static("public"));
+app.use("/assets", express.static("public"));
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -44,22 +55,5 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
-
-const client = mqtt.connect("mqtt://broker.hivemq.com")
-
-client.on('connect', () => {
-  console.log('Connected')
-  client.subscribe([topic, topicFoto, topicDHT], () => {
-    console.log(`Subscribe to topic '${topic}', topic '${topicFoto}' and topic '${topicDHT}`)
-  })
-})
-
-client.on('message', (topic, payload) => {
-  console.log('Received Message:', topic, payload.toString())
-})
-
-client.on('disconnect', () => {
-  console.log("Atsijunge");
-})
 
 module.exports = app;

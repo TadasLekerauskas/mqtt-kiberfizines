@@ -1,5 +1,29 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  h1 Siltnamio duomenys
+  ul(class="wrapper")
+    li(class="form-row")
+      label(for="fotorezistorius") Fotorezistoriaus duomenys 
+      textarea(name="fotorezistorius" id="fotorezistorius" rows=1 readonly) #{fotorezistorius}
+    li(class="form-row")
+      label(for="temperatura") Temperaturos duomenys 
+      textarea(name="temperatura" id="temperatura" rows=1 readonly) #{temperatura}
+    li(class="form-row")
+      label(for="dregme") Dregmes duomenys 
+      textarea(name="dregme" id="dregme" rows=1 readonly) #{dregme}
+  h1 Siltnamio reiksmiu nustatymai 
+  form(method="POST")
+    ul(class="wrapper")
+      li(class="form-row")
+        label(for="fotoSbmt") Fotorezistoriaus riba 
+        input(type="float" name="fotoSbmt" id="fotoSbmt" rows=1)
+      li(class="form-row")
+        label(for="tmpSbmt") Temperaturos max riba 
+        input(type="number" name="tmpSbmt" id="tmpSbmt" rows=1)
+      li(class="form-row")
+        label(for="drgSbmt") Temperaturos min riba 
+        input(type="number" name="drgSbmt" id="drgSbmt" rows=1)
+      li(class="from-row")
+        input(type="submit" name="submit" value="Patvirtinti")
+    
