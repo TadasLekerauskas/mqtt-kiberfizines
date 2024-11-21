@@ -14,7 +14,7 @@ var usersRouter = require('./routes/users');
 var app = express();
 
 /*** db aprasymas ***/
-var db = new sqlite3.Database('./data/notes.db');
+var db = new sqlite3.Database('./data/siltnamis.db');
 
 /*** db idejimas i req ***/
 app.use(function(req, res, next) 
