@@ -12,6 +12,12 @@ a {
   padding: 0;
   border-radius: 5px;
 }
+.wrapper2 {
+  background-color: rgb(164, 148, 148);
+  list-style-type: none;
+  padding: 10px;
+  border-radius: 5px;
+}
 .form-row {
   display: flex;
   justify-content: flex-end;
@@ -42,4 +48,29 @@ a {
   background-color: rgb(242, 248, 248);
   text-align: center;
   font-weight: bold;
+}
+
+.button{
+  background-color: #c7c17f;
+  border: none;
+  color: #000000;
+  padding: 16px 32px;
+  text-decoration: none;
+  margin: 4px 2px;
+  cursor: pointer;
+  text-align: center;
+}
+.center{
+  margin: 0 auto;
+  padding-bottom: 10px;
+  padding-left: 15px;
+  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+}
+p.information{
+  color: red;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
 }

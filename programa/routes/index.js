@@ -32,7 +32,7 @@ router.post('/siltnamis', function(req, res, next) {
         photoresistor = data[0].ftRk;
         temperature = data[0].tmpRk;
         humidity = data[0].drgRk;
-        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
+        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
       }
       else{
         console.log("Nera duomenu");
@@ -44,8 +44,7 @@ router.post('/siltnamis', function(req, res, next) {
 router.get('/siltnamis', function(req, res) {
   var db = req.db;
   if(once){
-    subscribe(db);
-    connectPostClient();
+    connectClient(db);
     once = false;
   }
 
@@ -59,7 +58,7 @@ router.get('/siltnamis', function(req, res) {
       photoresistor = data[0].ftRk;
       temperature = data[0].tmpRk;
       humidity = data[0].drgRk;
-      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
+      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
     }
     else{
       console.log("Nera duomenu");
@@ -69,12 +68,13 @@ router.get('/siltnamis', function(req, res) {
 
 module.exports = router;
 
-function connectClient(){
+function connectClient(db){
   client = mqtt.connect("mqtt://broker.hivemq.com");
 
   client.on('connect', () => {
     clientConnected = true;
     console.log("Client connected");
+    subscribe(db);
   })
   client.on('disconnect', () => {
     console.log("Atsijunge");
@@ -114,12 +114,12 @@ function subscribe(db){
   var topicFoto = 'info/fotorezistorius'
   var topicDHT = 'info/dhtSensorius'
 
-  if (postClientConnected){
-    postClient.subscribe([topicFoto, topicDHT], () => {
+  if (clientConnected){
+    client.subscribe([topicFoto, topicDHT], () => {
       console.log(`Subscribe to topic '${topicFoto}' and topic '${topicDHT}`)
     })
 
-    postClient.on('message', (topic, payload) => {
+    client.on('message', (topic, payload) => {
       console.log('Received Message:', topic, payload.toString())
       if (topic == 'info/fotorezistorius'){
         putPhotorezistor(db, payload, function(rez){
