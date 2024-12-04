@@ -15,6 +15,21 @@ block content
       li(class="form-row")
         label(for="dregme") Dregmes duomenys 
         textarea(name="dregme" id="dregme" rows=1 readonly) #{dregme}
+      if sviesa
+          h2(style="text-align: center") Šviesa įjungta
+      else 
+          h2(style="text-align: center") Šviesa išjungta
+      endif
+      if variklis
+          h2(style="text-align: center") Langas atidarytas
+      else 
+          h2(style="text-align: center") Langas uždarytas
+      endif
+      if sildymas
+          h2(style="text-align: center") Šildymas Įjungtas
+      else 
+          h2(style="text-align: center") Šildymas išjungtas
+      endif
     h1 Siltnamio reiksmiu nustatymai 
     form(method="POST")
       ul(class="wrapper")

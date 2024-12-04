@@ -9,6 +9,10 @@ let clientConnected = false;
 let client;
 let loggedIn = false;
 
+let photoresistor = 0;
+let temperature = 0;
+let humidity = 0;
+
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -67,7 +71,23 @@ router.post('/siltnamis', function(req, res, next) {
         photoresistor = data[0].ftRk;
         temperature = data[0].tmpRk;
         humidity = data[0].drgRk;
-        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
+        let sviesa = data[0].lempa;
+        let variklis = data[0].variklis;
+        let sildymas = data[0].sildytuvas;
+        let sviesaBool = false;
+        let variklisBool = false;
+        let sildymasBool = false;
+        //console.log(data[0]);
+        if (sviesa == "1") 
+          sviesaBool = true;
+        if (variklis == "1")
+          variklisBool = true;
+        if (sildymas == "1")
+          sildymasBool = true;
+        console.log("Sviesos skaicius"+sviesa);
+        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, 
+                            clientConnection: clientConnected, sviesa: sviesaBool, variklis: variklisBool,
+                            sildymas: sildymasBool});
       }
       else{
         console.log("Nera duomenu");
@@ -98,7 +118,23 @@ router.get('/siltnamis', function(req, res) {
         photoresistor = data[0].ftRk;
         temperature = data[0].tmpRk;
         humidity = data[0].drgRk;
-        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
+        let sviesa = data[0].lempa;
+        let variklis = data[0].variklis;
+        let sildymas = data[0].sildytuvas;
+        let sviesaBool = false;
+        let variklisBool = false;
+        let sildymasBool = false;
+        //console.log(data);
+        if (sviesa == "1") 
+          sviesaBool = true;
+        if (variklis == "1")
+          variklisBool = true;
+        if (sildymas == "1")
+          sildymasBool = true;
+        console.log("Sviesos skaicius"+sviesa);
+        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, 
+                            clientConnection: clientConnected, sviesa: sviesaBool, variklis: variklisBool,
+                            sildymas: sildymasBool});
       }
       else{
         console.log("Nera duomenu");
@@ -194,7 +230,9 @@ function subscribe(db){
     client.on('message', (topic, payload) => {
       console.log('Received Message:', topic, payload.toString())
       if (topic == 'info/fotorezistorius'){
-        putPhotorezistor(db, payload, function(rez){
+        let sk = payload.toString();
+        let arr = sk.split(' ');
+        putPhotorezistor(db, arr[0], arr[1], function(rez){
           if(rez != null)
           {
             console.log("Neatnaujinti fotorezistoriaus duomenys");
@@ -204,7 +242,8 @@ function subscribe(db){
       else if (topic == 'info/dhtSensorius'){
         let sk = payload.toString();
         let arr = sk.split(' ');
-        putTempHum(db, arr[0], arr[1],function(rez){
+        console.log(arr);
+        putTempHum(db, arr[0], arr[1], arr[2], arr[3], function(rez){
           if(rez != null)
           {
             console.log("Neatnaujinti temperaturos ir dregmes duomenys");
@@ -220,7 +259,7 @@ function subscribe(db){
 
 function getAllData(db, callback)
 {
-  db.all('select Temperatura.Id as tmpId, Temperatura.Reiksme as tmpRk, Dregme.Id as drgId, Dregme.Reiksme as drgRk, Fotorezistorius.Id ftId, Fotorezistorius.Reiksme as ftRk FROM Temperatura, Dregme, Fotorezistorius', function(err,rows)
+  db.all('select Temperatura.Id as tmpId, Temperatura.Reiksme as tmpRk, Dregme.Id as drgId, Dregme.Reiksme as drgRk, Fotorezistorius.Id as ftId, Fotorezistorius.Reiksme as ftRk, Aktuatoriu_busena.variklis as variklis, Aktuatoriu_busena.lempa as lempa, Aktuatoriu_busena.sildytuvas as sildytuvas FROM Temperatura, Dregme, Fotorezistorius, Aktuatoriu_busena', function(err,rows)
   {
       if(err)
       {
@@ -234,26 +273,44 @@ function getAllData(db, callback)
   });
 }
 
-function putPhotorezistor(db, photoData, callback){
+function putPhotorezistor(db, photoData, sviesa, callback){
   db.run("update Fotorezistorius set Reiksme = ?; ", photoData, function(updateError)
-    {
-        //jei nebuvo jokios klaidos updateError=null
-        //jei buvo klaida updateError=klaidos_pranesimas
-        return callback(updateError);  
-    });
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
+  db.run("update Aktuatoriu_busena set lempa = ?; ", sviesa, function(updateError)
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
 }
 
-function putTempHum(db, tempData, humData, callback){
+function putTempHum(db, tempData, humData, servo, relay, callback){
   db.run("update Temperatura set Reiksme = ?; ", tempData, function(updateError)
-    {
-        //jei nebuvo jokios klaidos updateError=null
-        //jei buvo klaida updateError=klaidos_pranesimas
-        return callback(updateError);  
-    });
-    db.run("update Dregme set Reiksme = ?; ", humData, function(updateError)
-    {
-        //jei nebuvo jokios klaidos updateError=null
-        //jei buvo klaida updateError=klaidos_pranesimas
-        return callback(updateError);  
-    });
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
+  db.run("update Dregme set Reiksme = ?; ", humData, function(updateError)
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
+  db.run("update Aktuatoriu_busena set variklis = ?; ", servo, function(updateError)
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
+  db.run("update Aktuatoriu_busena set sildytuvas = ?; ", relay, function(updateError)
+  {
+      //jei nebuvo jokios klaidos updateError=null
+      //jei buvo klaida updateError=klaidos_pranesimas
+      return callback(updateError);  
+  });
 }
