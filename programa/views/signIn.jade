@@ -14,3 +14,8 @@ block content
                     input(type="password" name="password" id="password")
                 li(class="form-row")
                     input(type="submit" name="submit" id="submit" class="button" value="Prisijungti")
+                li(class="from-row")
+                    if errorMsg
+                        div(class="center")
+                        p(class="information") Neteisingas vartotojo vardas arba slaptazodis!
+                    endif 

@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
   if(loggedIn){
     res.redirect("http://localhost:3000/siltnamis");
   } else {
-    res.render('signIn');
+    res.render('signIn', {errorMsg: false});
   }
 })
 
@@ -24,21 +24,32 @@ router.post('/', function(req, res, next) {
   var db = req.db;
   var prisVardas = req.body.username;
   var slapt = req.body.password;
-  console.log(req.body);
-  encryptPassword(slapt);
-  /*
+  //console.log(req.body);
+  //encryptPassword(slapt);
+  
   getUsernameAndPassword(db, function(data){
     if(data != null){
       //console.log(data[0]);
       username = data[0].vardas;
-      password = data[0].slaptazodis;
-
-      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
+      hashedPassword = data[0].slaptazodis;
+      let ats = verify(prisVardas, username, slapt, hashedPassword)
+      .then(ats => {
+        console.log("Bendras atsakymas: " + ats);
+        if(ats){
+          loggedIn = true;
+          res.redirect("http://localhost:3000/siltnamis");
+        }
+        else{
+          res.render("signIn", {errorMsg: true});
+        }
+      });
+      
+        
     }
     else{
       console.log("Nerastas prisijungimas");
     }
-  })*/
+  })
 })
 
 router.post('/siltnamis', function(req, res, next) {
@@ -63,31 +74,40 @@ router.post('/siltnamis', function(req, res, next) {
       }
     })
   }
+  else if (req.body.submit == 'Atsijungti'){
+    loggedIn = false;
+    res.redirect("http://localhost:3000");
+  }
 })
 
 router.get('/siltnamis', function(req, res) {
-  var db = req.db;
-  if(once){
-    connectClient(db);
-    once = false;
-  }
+  if(loggedIn){
+    var db = req.db;
+    if(once){
+      connectClient(db);
+      once = false;
+    }
 
-  let photoresistor = -1;
-  let temperature = -100;
-  let humidity = -1;
-  // padaryta taip nes vienas
-  getAllData(db, function(data){
-    if(data != null){
-      //console.log(data[0]);
-      photoresistor = data[0].ftRk;
-      temperature = data[0].tmpRk;
-      humidity = data[0].drgRk;
-      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
-    }
-    else{
-      console.log("Nera duomenu");
-    }
-  })
+    let photoresistor = -1;
+    let temperature = -100;
+    let humidity = -1;
+    // padaryta taip nes vienas
+    getAllData(db, function(data){
+      if(data != null){
+        //console.log(data[0]);
+        photoresistor = data[0].ftRk;
+        temperature = data[0].tmpRk;
+        humidity = data[0].drgRk;
+        res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
+      }
+      else{
+        console.log("Nera duomenu");
+      }
+    })
+  }
+  else{
+    res.redirect("http://localhost:3000/");
+  }
 })
 
 module.exports = router;
@@ -98,8 +118,11 @@ async function encryptPassword(password){
   console.log(hashedPassword);
 }
 
-async function verify(){
-
+async function verify(givenUsern, realUsern, password, hashedPassword){
+  const matchingPasswords = await bcrypt.compare(password, hashedPassword);
+  console.log("Ar slaptazodis geras? " + matchingPasswords);
+  const metchingUsernames = givenUsern == realUsern;
+  return matchingPasswords && metchingUsernames;
 }
 
 function getUsernameAndPassword(db, callback){
