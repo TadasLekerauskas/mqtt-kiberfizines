@@ -1,20 +1,44 @@
 var express = require('express');
 var router = express.Router();
 
+const bcrypt = require('bcrypt');
+
 const mqtt = require('mqtt')
 let once = true;
 let clientConnected = false;
 let client;
+let loggedIn = false;
 
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('signIn');
+  if(loggedIn){
+    res.redirect("http://localhost:3000/siltnamis");
+  } else {
+    res.render('signIn');
+  }
 })
 
 router.post('/', function(req, res, next) {
   console.log("Post metodas vyksta!");
-  res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity});
+  var db = req.db;
+  var prisVardas = req.body.username;
+  var slapt = req.body.password;
+  console.log(req.body);
+  encryptPassword(slapt);
+  /*
+  getUsernameAndPassword(db, function(data){
+    if(data != null){
+      //console.log(data[0]);
+      username = data[0].vardas;
+      password = data[0].slaptazodis;
+
+      res.render('index', {fotorezistorius: photoresistor, temperatura: temperature, dregme: humidity, clientConnection: clientConnected});
+    }
+    else{
+      console.log("Nerastas prisijungimas");
+    }
+  })*/
 })
 
 router.post('/siltnamis', function(req, res, next) {
@@ -67,6 +91,31 @@ router.get('/siltnamis', function(req, res) {
 })
 
 module.exports = router;
+
+async function encryptPassword(password){
+  const salt = await bcrypt.genSalt();
+  const hashedPassword = await bcrypt.hash(password, salt);
+  console.log(hashedPassword);
+}
+
+async function verify(){
+
+}
+
+function getUsernameAndPassword(db, callback){
+  db.all('select Prisijungimas.vardas as vardas, Prisijungimas.slaptazodis as slaptazodis FROM Prisijungimas', function(err,rows)
+  {
+      if(err)
+      {
+          console.log('*** Error serving querying database. ' + err);
+          return callback(null);
+      }
+      else
+      {
+          return callback(rows);
+      }
+  });
+}
 
 function connectClient(db){
   client = mqtt.connect("mqtt://broker.hivemq.com");
