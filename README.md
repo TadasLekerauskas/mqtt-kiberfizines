@@ -1,1 +1,1 @@
-# this is a read me file, It is empty
+# Ši repozitorija skirta sukurti programą, kuri palaikytų mqtt brokerį, priimtų ir siųstų žinutes
